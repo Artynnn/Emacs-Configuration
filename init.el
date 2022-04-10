@@ -31,6 +31,14 @@
 		      :weight 'regular
 		      :height 150))
 
+(use-package repeat
+  :straight nil
+  :custom
+  (repeat-on-final-keystroke t)
+  (set-mark-command-repeat-pop t)
+  :config
+  (repeat-mode 1))
+
 ;;; completion
 (use-package orderless
   :straight t
@@ -111,13 +119,168 @@
   (autoload 'projectile-project-root "projectile")
   (setq consult-project-root-function #'projectile-project-root))
 
+;;; general
+(use-package general
+  :straight t
+  :config
+  (global-unset-key (kbd "M-SPC"))
+  (general-create-definer artyn-vc
+			  :prefix "C-x v"))
+
+;;; window management
+(use-package windmove
+  :straight nil
+  :config
+  (windmove-default-keybindings)
+  (add-hook 'org-shiftup-final-hook 'windmove-up)
+  (add-hook 'org-shiftleft-final-hook 'windmove-left)
+  (add-hook 'org-shiftdown-final-hook 'windmove-down)
+  (add-hook 'org-shiftright-final-hook 'windmove-right)
+  :bind(("s-<right>" . windmove-right)
+	("s-<left>" . windmove-left)
+	("s-<up>" . windmove-up)
+	("s-<down>" . windmove-down)))
+
+(use-package ace-window
+  :straight t
+  :bind (("C-c o" . ace-window)))
+
+;;; themes
+(use-package stimmung-themes
+  :straight t)
+
+;;; search
+(use-package isearch
+  :straight nil
+  :custom
+  (search-highlight t)
+  (search-whitespace-regexp ".*?")
+  (isearch-lax-whitespace t)
+  (isearch-regexp-lax-whitespace nil)
+  (isearch-lazy-highlight t)
+  (isearch-lazy-count t)
+  (lazy-count-prefix-format nil)
+  (lazy-count-suffix-format " (%s/%s)")
+  (isearch-yank-on-move 'shift)
+  (isearch-allow-scroll 'unlimited)
+  ;; These variables are from Emacs 28
+  (isearch-repeat-on-direction-change t)
+  (lazy-highlight-initial-delay 0.5)
+  (lazy-highlight-no-delay-length 3)
+  (isearch-wrap-pause t)
+  :bind (:map isearch-mode-map
+	      ("C-g" . isearch-cancel)
+	      ("M-/" . isearch-complete)))
+
+;;; better help
+(use-package helpful
+  :straight t
+  :bind (("C-h f" . helpful-callable)
+         ("C-h v" . helpful-variable)
+         ("C-h k" . helpful-key)
+         ("C-c C-d" . helpful-at-point)
+         ("C-h C" . helpful-command)))
+
+;;; embark
+(use-package embark
+  :straight t
+  :bind
+  ;; "actually...", "yes but first" commmand
+  (("C-." . embark-act)
+   ("C-;" . embark-dwim)
+   ("C-h B" . embark-bindings))
+  :init
+  (setq prefix-help-command #'embark-prefix-help-command)
+  :config
+  (add-to-list 'display-buffer-alist
+               '(
+		 "\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
 ;;; programming
 ;;;; indentation
 (use-package aggressive-indent
   :straight t
   :hook ((emacs-lisp-mode . aggressive-indent-mode)))
 
-;;; structured editing
+;;;; project management
+(use-package projectile
+  :straight t
+  :init
+  (setq projectile-project-search-path '(
+					 ;; non elisp projects
+					 "~/Sync/Projects/"
+					 ;; elisp projects
+					 "~/Sync/Projects/Emacs-Configuration/straight/repos/"
+					 ;; my blog / digital garden
+					 "~/Sync/Writing/roamNotes"
+					 ))
+  :config
+  (global-set-key (kbd "C-c p") 'projectile-command-map)
+  (global-set-key (kbd "s-p") 'projectile-command-map)
+  (projectile-mode +1))
+
+
+;;;; language specific
+(use-package nix-mode
+  :straight t)
+
+(use-package lua-mode
+  :straight t)
+
+;; supports common HTML templating languages
+(use-package web-mode
+  :straight t
+  :mode
+  (("\\.html?\\'" . web-mode)))
+
+;; tag expansion for HTML
+(use-package emmet-mode
+  :straight t
+  :hook (emmet-mode . web-mode)
+  :bind (("C-j" . emmet-expand-yas)
+	 ;; alternatively C-y or C-c w
+	 ("C-c %" . emmet-wrap-with-markup)))
+
+;; only use for emacs lisp
+(use-package xref
+  :straight nil
+  :custom
+  ;; All those have been changed for Emacs 28
+  (xref-show-definitions-function #'xref-show-definitions-completing-read) ; for M-.
+  (xref-show-xrefs-function #'xref-show-definitions-buffer) ; for grep and the like
+  (xref-file-name-display 'project-relative)
+  (xref-search-program 'grep))
+
+;;;; linting
+(use-package flycheck
+  :straight t
+  :commands flycheck-mode)
+
+;;;; LSP
+(use-package lsp-mode
+  :straight t
+  :custom
+  (lsp-keymap-prefix "C-c l")
+  :hook ((LaTeX-mode . lsp-mode))
+  :commands lsp)
+
+;;;; in line completion
+(use-package company
+  :straight t
+  :bind (("s-/" . company-complete)))
+
+(use-package dabbrev
+  :straight nil
+  :bind (("M-/" . dabbrev-completion)
+	 ("C-M-/" . dabbrev-expand)))
+
+;;;; pastebin
+(use-package 0x0
+  :straight t)
+
+;;;; structured editing
 (use-package outline
   :straight nil
   :custom
@@ -146,7 +309,8 @@
 	 ("M-<up>" . prot-outline-move-major-heading-up)
 	 ("C-x n s" . prot-outline-narrow-to-subtree)))
 
-;;; org mode
+;;; writing
+;;;; org mode
 (use-package org
   :straight t
   :bind (("C-c c" . org-capture))
@@ -163,6 +327,86 @@
 			   ("f" "Elfeed" entry (file+olp+datetree "~/Sync/Writing/private/cpb.org") "* %? :feed:\n")
 			   ("m" "Mastodon" entry (file+olp+datetree "~/Sync/Writing/roamNotes/20220314195005-mastodon_toots.org") "* %U :tobesent:\n%?")
 			   )))
+;;;; spellcheck
+(use-package recomplete
+  :straight t
+  :custom
+  (ispell-program-name "hunspell")
+  :bind (("M-p" . recomplete-ispell-word)
+	 ("M-P" . (lambda ()
+		    (interactive)
+		    (let ((current-prefix-arg '(-1)))
+		      (call-interactively 'recomplete-ispell-word))))))
+
+;;;; markdown
+(use-package markdown-mode
+  :straight t)
+
+;;;; dictionary and thesaurus
+(use-package synosaurus
+  :straight t
+  :custom
+  (synosaurus-choose-method 'Completing read)
+  (synosaurus-backend 'synosaurus-backend-wordnet)
+  :bind (("s-|" . synosaurus-choose-and-replace)))
+
+(use-package wordnut
+  :straight t
+  :bind(;; ("M-\\" . wordnut-lookup-current-word)
+	("s-\\" . wordnut-lookup-current-word)))
+
+;;;; visual environment for writing
+(use-package olivetti
+  :straight t
+  :custom
+  (olivetti-body-width 0.5)
+  (olivetti-minimum-body-width 65)
+  (olivetti-recall-visual-line-mode-entry-state t))
+
+(use-package logos
+  :straight (logos
+	     :type git
+	     :host github
+	     :repo "protesilaos/logos")
+  :config
+  (let ((map global-map))
+    (define-key map (kbd "C-x n n") #'logos-narrow-dwim)
+    (define-key map [remap forward-page] #'logos-forward-page-dwim)
+    (define-key map [remap backward-page] #'logos-backward-page-dwim)
+    (define-key map (kbd "<f7>") #'logos-focus-mode))
+  (defun logos--reveal-entry ()
+    "Reveal Org or Outline entry."
+    (cond
+     ((and (eq major-mode 'org-mode)
+           (org-at-heading-p))
+      (org-show-entry))
+     ((or (eq major-mode 'outline-mode)
+          (bound-and-true-p outline-minor-mode))
+      (outline-show-entry))))
+  (add-hook 'logos-page-motion-hook #'logos--reveal-entry)
+  :custom
+  ;; If you want to use outlines instead of page breaks (the ^L)
+  (logos-outlines-are-pages t)
+  (logos-outline-regexp-alist
+   `((emacs-lisp-mode . "^;;;+ ")
+     (org-mode . "^\\*+ +")
+     (t . ,(or outline-regexp logos--page-delimiter))))
+  ;; These apply when `logos-focus-mode' is enabled.
+  (logos-hide-mode-line nil)
+  (logos-scroll-lock nil)
+  (logos-variable-pitch nil)
+  (logos-indicate-buffer-boundaries nil)
+  (logos-buffer-read-only nil)
+  (logos-olivetti t))
+
+;;;; emacs everywhere
+(use-package emacs-everywhere
+  :straight (emacs-everywhere
+	     :type git
+	     :host github
+	     :repo "tecosaur/emacs-everywhere"
+	     :fork (:host github :repo "Artynnn/emacs-everywhere")))
+
 ;;; version control
 (use-package magit
   :straight t
@@ -176,6 +420,129 @@
     (setq auto-mode-alist
           (delete (cons git-rebase-filename-regexp 'git-rebase-mode)
                   auto-mode-alist))))
+
+(use-package vc
+  :straight nil
+  :general
+  (artyn-vc
+   "b" #'vc-retrieve-tag ; "branch" switch
+   "t" #'vc-create-tag
+   "f" #'vc-log-incoming  ; the actual git fetch
+   "o" #'vc-log-outgoing
+   "F" #'vc-update        ; "F" because "P" is push
+   "d" #'vc-diff)
+  :config
+  ;; Those offer various types of functionality, such as blaming,
+  ;; viewing logs, showing a dedicated buffer with changes to affected
+  ;; files.
+  (require 'vc-annotate)
+  (require 'vc-dir)
+  (require 'vc-git)
+  (require 'add-log)
+  (require 'log-view)
+
+  ;; This one is for editing commit messages.
+  (require 'log-edit)
+  :custom
+  (log-edit-confirm 'changed)
+  (log-edit-keep-buffer nil)
+  (log-edit-require-final-newline t)
+  (log-edit-setup-add-author nil)
+  (vc-find-revision-no-save t)
+  (vc-annotate-display-mode 'scale) ; scale to oldest
+  (add-log-mailing-address "swbvty@gmail.com")
+  (add-log-keep-changes-together t)
+  (vc-git-diff-switches '("--patch-with-stat" "--histogram"))
+  (vc-git-print-log-follow t)
+  (vc-git-revision-complete-only-branches nil)
+  (vc-git-root-log-format
+   '("%d %h %ad %an: %s"
+     ;; The first shy group matches the characters drawn by --graph.
+     ;; We use numbered groups because `log-view-message-re' wants the
+     ;; revision number to be group 1.
+     "^\\(?:[*/\\|]+\\)\\(?:[*/\\| ]+\\)?\
+\\(?2: ([^)]+) \\)?\\(?1:[0-9a-z]+\\) \
+\\(?4:[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\) \
+\\(?3:.*?\\):"
+     ((1 'log-view-message)
+      (2 'change-log-list nil lax)
+      (3 'change-log-name)
+      (4 'change-log-date))))
+  :hook ((log-view-mode . hl-line-mode)) ; -hook?
+  :bind (
+	 :map vc-dir-mode-map
+	 ("b" . vc-retrieve-tag)
+	 ("t" . vc-create-tag)
+	 ("O" . vc-log-outgoing)
+	 ("o" . vc-dir-find-file-other-window)
+	 ("f" . vc-log-incoming) ; replaces `vc-dir-find-file' (use RET)
+	 ("F" . vc-update)       ; symmetric with P: `vc-push'
+	 ("d" . vc-diff)         ; parallel to D: `vc-root-diff'
+	 ("k" . vc-dir-clean-files)
+	 ("G" . vc-revert)
+	 :map vc-git-stash-shared-map
+	 ("a" . vc-git-stash-apply-at-point)
+	 ("c" . vc-git-stash) ; "create" named stash
+	 ("D" . vc-git-stash-delete-at-point)
+	 ("p" . vc-git-stash-pop-at-point)
+	 ("s" . vc-git-stash-snapshot)
+	 :map vc-annotate-mode-map
+	 ("M-q" . vc-annotate-toggle-annotation-visibility)
+	 ("C-c C-c" . vc-annotate-goto-line)
+	 ("<return>" . vc-annotate-find-revision-at-line)
+	 :map log-view-mode-map
+	 ("<tab>" . log-view-toggle-entry-display)
+	 ("<return>" . log-view-find-revision)
+	 ("s" . vc-log-search)
+	 ("o" . vc-log-outgoing)
+	 ("f" . vc-log-incoming)
+	 ("F" . vc-update)
+	 ("P" . vc-push)))
+
+(use-package prot-vc
+  :straight (:host gitlab :repo "protesilaos/dotfiles" :branch "master"
+                   :files ("emacs/.emacs.d/prot-lisp/prot-common.el"
+                           "emacs/.emacs.d/prot-lisp/prot-vc.el"))
+  :general
+  (artyn-vc
+    "i" #'prot-vc-git-log-insert-commits
+    "p" #'prot-vc-project-or-dir
+    "SPC" #'prot-vc-custom-log
+    "g" #'prot-vc-git-grep
+    "G" #'prot-vc-git-log-grep
+    "a" #'prot-vc-git-patch-apply
+    "c" #'prot-vc-git-patch-create-dwim
+    "s" #'prot-vc-git-show
+    "r" #'prot-vc-git-find-revision
+    "B" #'prot-vc-git-blame-region-or-file
+    "R" #'prot-vc-git-reset)
+  :custom
+  (prot-vc-log-limit 100)
+  (prot-vc-log-bulk-action-limit 50)
+  (prot-vc-git-log-edit-show-commits t)
+  (prot-vc-git-log-edit-show-commit-count 10)
+  (prot-vc-shell-output "*prot-vc-output*")
+  (prot-vc-patch-output-dirs (list "~/" "~/Sync/Projects/patches"))
+  :config
+  (prot-vc-git-setup-mode 1)
+  :bind (
+	 :map vc-git-log-edit-mode-map
+	 ("C-c C-n" . prot-vc-git-log-edit-extract-file-name)
+	 ("C-c C-i" . prot-vc-git-log-insert-commits)
+	 ;; Also done by `prot-vc-git-setup-mode', but I am putting it here
+	 ;; as well for visibility.
+	 ("C-c C-c" . prot-vc-git-log-edit-done)
+	 ("C-c C-a" . prot-vc-git-log-edit-toggle-amend)
+	 ("M-p" . prot-vc-git-log-edit-previous-comment)
+	 ("M-n" . prot-vc-git-log-edit-next-comment)
+	 ("M-s" . prot-vc-git-log-edit-complete-comment)
+	 ("M-r" . prot-vc-git-log-edit-complete-comment)
+	 :map log-view-mode-map
+	 ("<C-tab>" . prot-vc-log-view-toggle-entry-all)
+	 ("a" . prot-vc-git-patch-apply)
+	 ("c" . prot-vc-git-patch-create-dwim)
+	 ("R" . prot-vc-git-log-reset)
+	 ("w" . prot-vc-log-kill-hash)))
 
 ;;; web browsing
 (use-package eww
