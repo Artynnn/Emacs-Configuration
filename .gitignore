@@ -16,3 +16,7 @@ prot-eww-visited-history
 session*
 # index of directories recognized by projectile
 projectile-bookmarks.eld
+# syncthing, which is a file synchronization program
+.syncthing*
+# something to do with magit, I believe it is some sort of cache?
+transient/
