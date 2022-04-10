@@ -1,0 +1,27 @@
+#+title: Artyn's Emacs configuration
+
+This is my personal Emacs Configuration. I use Emacs as my "graphical shell" and "integrated computing environment".
+
+* Features and goals
+
+- *simple*: No custom macros are used for configuration, I just use the common =use-package=. This makes it very easy to grok.
+
+- *featureful*: My Emacs configuration is a integrated computing environment, it supports writing, programming, feed reading, web browsing and file management etc.
+
+* Installation requirements
+
+- POSIX environment (WSL, Linux, OSX). I currently only use Debian and NixOS. AFAIK WSL has problems with linux audio so my =bongo= and =empv.el= configuration cannot be used.
+- git
+- mpv
+- vlc
+- wordnet
+- ripgrep
+- LSP language servers
+- hunspell
+- compiled Emacs from master branch
+
+You can see my NixOS configuration for how all of this is set-up
+
+* Tips
+
+- Having a compiled Emacs together with =straight.el= means 
