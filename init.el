@@ -169,7 +169,13 @@
   :custom
   ;; useful for prose
   (magit-diff-refine-hunk t)
-  (vc-follow-symlinks nil))
+  (vc-follow-symlinks nil)
+  :config
+  ;; banish rebase
+  (with-eval-after-load 'git-rebase
+    (setq auto-mode-alist
+          (delete (cons git-rebase-filename-regexp 'git-rebase-mode)
+                  auto-mode-alist))))
 
 ;;; web browsing
 (use-package eww
