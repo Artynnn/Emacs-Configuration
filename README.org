@@ -24,4 +24,6 @@ You can see my NixOS configuration for how all of this is set-up
 
 * Tips
 
-- Having a compiled Emacs together with =straight.el= means 
+- Having a compiled Emacs together with =straight.el= means that you can easily contribute to all of Emacs and you get the latest goodies.
+
+- Have a Emacs notes file. This makes it easier to get better at using Emacs and to flesh out ideas that you have.
