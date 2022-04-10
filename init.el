@@ -198,6 +198,11 @@
                  nil
                  (window-parameters (mode-line-format . none)))))
 
+;;; avy
+(use-package avy
+  :straight t
+  :bind (("C-c j" . avy-goto-char-timer)))
+
 ;;; programming
 ;;;; indentation
 (use-package aggressive-indent
