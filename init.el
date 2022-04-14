@@ -15,7 +15,8 @@
   (make-backup-files nil)
   (recentf-max-menu-items 25)
   (user-full-name "Artyn Karadak")
-  (user-mail-address "GarethPrichett124115@protonmail.com")
+  ;; (user-mail-address "GarethPrichett124115@protonmail.com")
+  (user-mail-address "AmaziahBender49964@cock.li")
   (blink-cursor-mode 0)
   (set-fringe-mode 0)
   (custom-file "~/.emacs.d/custom.el")
@@ -125,7 +126,7 @@
   :config
   (global-unset-key (kbd "M-SPC"))
   (general-create-definer artyn-vc
-			  :prefix "C-x v"))
+    :prefix "C-x v"))
 
 ;;; window management
 (use-package windmove
@@ -144,6 +145,13 @@
 (use-package ace-window
   :straight t
   :bind (("C-c o" . ace-window)))
+
+;;; modeline
+(use-package clean-modeline
+  :straight (clean-modeline
+	     :type git
+	     :host github
+	     :repo "Artynnn/clean-modeline"))
 
 ;;; themes
 (use-package stimmung-themes
@@ -202,6 +210,14 @@
 (use-package avy
   :straight t
   :bind (("C-c j" . avy-goto-char-timer)))
+
+;; broken
+(use-package artyn-avy
+  :after avy
+  :straight (artyn-avy
+	     :type git
+	     :host github
+	     :repo "Artynnn/artyn-avy-extensions"))
 
 ;;; programming
 ;;;; indentation
@@ -274,7 +290,9 @@
 ;;;; in line completion
 (use-package company
   :straight t
-  :bind (("s-/" . company-complete)))
+  :bind (("s-/" . company-complete))
+  :config
+  (global-company-mode))
 
 (use-package dabbrev
   :straight nil
@@ -409,8 +427,7 @@
   :straight (emacs-everywhere
 	     :type git
 	     :host github
-	     :repo "tecosaur/emacs-everywhere"
-	     :fork (:host github :repo "Artynnn/emacs-everywhere")))
+	     :repo "Artynnn/emacs-everywhere"))
 
 ;;; version control
 (use-package magit
@@ -430,12 +447,12 @@
   :straight nil
   :general
   (artyn-vc
-   "b" #'vc-retrieve-tag ; "branch" switch
-   "t" #'vc-create-tag
-   "f" #'vc-log-incoming  ; the actual git fetch
-   "o" #'vc-log-outgoing
-   "F" #'vc-update        ; "F" because "P" is push
-   "d" #'vc-diff)
+    "b" #'vc-retrieve-tag ; "branch" switch
+    "t" #'vc-create-tag
+    "f" #'vc-log-incoming  ; the actual git fetch
+    "o" #'vc-log-outgoing
+    "F" #'vc-update        ; "F" because "P" is push
+    "d" #'vc-diff)
   :config
   ;; Those offer various types of functionality, such as blaming,
   ;; viewing logs, showing a dedicated buffer with changes to affected
@@ -455,7 +472,7 @@
   (log-edit-setup-add-author nil)
   (vc-find-revision-no-save t)
   (vc-annotate-display-mode 'scale) ; scale to oldest
-  (add-log-mailing-address "swbvty@gmail.com")
+  (add-log-mailing-address "example@example.com")
   (add-log-keep-changes-together t)
   (vc-git-diff-switches '("--patch-with-stat" "--histogram"))
   (vc-git-print-log-follow t)
@@ -584,6 +601,8 @@
 	      ("v" . nil)
 	      :map eww-mode-map
 	      ("L" . eww-list-bookmarks)
+	      ("{" . backward-paragraph)
+              ("}" . forward-paragraph)
 	      :map dired-mode-map
 	      ("E" . eww-open-file)
 	      :map eww-buffers-mode-map
@@ -596,10 +615,10 @@
                    :files ("emacs/.emacs.d/prot-lisp/prot-common.el"
                            "emacs/.emacs.d/prot-lisp/prot-eww.el"))
   :custom
-  (prot-eww-save-history-file "~/.emacs.d/prot-eww-visited-history")
+  ;; (prot-eww-save-history-file "~/.emacs.d/prot-eww-visited-history")
   (prot-eww-save-visited-history t)
-  ;; (prot-eww-save-history-file
-  ;;       (locate-user-emacs-file "prot-eww-visited-history"))
+  (prot-eww-save-history-file
+   (locate-user-emacs-file "prot-eww-visited-history"))
   ;; (prot-eww-save-visited-history nil)
   (prot-eww-bookmark-link nil)
   :hook ((prot-eww-history-mode . hl-line-mode))
@@ -620,6 +639,38 @@
 	 ("R" . prot-eww-readable)
 	 ("Q" . prot-eww-quit)))
 
+;; https://github.com/oantolin/emacs-config/blob/8a948477181ae35f2e35f44246787a51748a47ae/my-lisp/shr-heading.el
+(use-package shr-heading
+  :straight (:host github :repo "oantolin/emacs-config" :branch "master"
+                   :files ("my-lisp/shr-heading.el"))
+  :bind (("C-c C-p" . shr-heading-previous)
+	 ("C-c C-n" . shr-heading-next)))
+
+;; https://github.com/alphapapa/unpackaged.el#eww-imenu-support
+(defun unpackaged/imenu-eww-headings ()
+  "Return alist of HTML headings in current EWW buffer for Imenu.
+Suitable for `imenu-create-index-function'."
+  (let ((faces '(shr-h1 shr-h2 shr-h3 shr-h4 shr-h5 shr-h6 shr-heading)))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char (point-min))
+        (cl-loop for next-pos = (next-single-property-change (point) 'face)
+                 while next-pos
+                 do (goto-char next-pos)
+                 for face = (get-text-property (point) 'face)
+                 when (cl-typecase face
+                        (list (cl-intersection face faces))
+                        (symbol (member face faces)))
+                 collect (cons (buffer-substring (point-at-bol) (point-at-eol)) (point))
+                 and do (forward-line 1))))))
+
+(add-hook 'eww-mode-hook
+          (lambda ()
+            (setq-local imenu-create-index-function #'unpackaged/imenu-eww-headings)))
+
+
+
 ;;; file management
 (use-package dired
   :straight nil
@@ -633,7 +684,7 @@
   ;; also see `dired-do-revert-buffer'
   (dired-auto-revert-buffer #'dired-directory-changed-p)
   :hook ((dired-mode . dired-hide-details-mode)
-         (dired-mode . hl-line-mode)))
+	 (dired-mode . hl-line-mode)))
 
 (use-package prot-dired
   :straight (:host gitlab :repo "protesilaos/dotfiles" :branch "master"
@@ -885,9 +936,9 @@
 ;;; mpv management
 (use-package empv
   :straight (empv
-	       :type git
-	       :host github
-	       :repo "isamert/empv.el")
+	     :type git
+	     :host github
+	     :repo "isamert/empv.el")
   :custom
   ;; https://y.com.sb/
   ;; https://invidious.lunar.icu/
@@ -921,3 +972,31 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;;; password management
+(use-package pass
+  :straight t
+  :custom
+  (epa-pinentry-mode 'loopback)
+  ;; experimental and probably not a good idea:
+  :hook((pass-view-mode . org-mode)))
+
+;;; email
+;;;; notmuch
+(use-package notmuch
+  :straight (:host github :repo "notmuch/notmuch" :branch "master"
+                   :files ("emacs/*")))
+
+;; MSMTP setting for multi-smtp sending
+(setq message-send-mail-function 'message-send-mail-with-sendmail)
+
+;;;; msmtp
+(setq user-full-name "Artyn")
+(setq user-mail-adress "AmaziahBender49964@cock.li")
+(setq mail-user-agent 'message-user-agent)
+(setq mail-specify-envelope-from t)
+(setq sendmail-program "/usr/bin/msmtp"
+      mail-specify-envelope-from t
+      mail-envelope-from 'header
+      message-sendmail-envelope-from 'header)
+

@@ -8,7 +8,9 @@ This is my personal Emacs Configuration. I use Emacs as my "graphical shell" and
 
 - *featureful*: My Emacs configuration is a integrated computing environment, it supports writing, programming, feed reading, web browsing and file management etc.
 
-* Installation requirements
+* Installation
+
+It has the following requirements:
 
 - POSIX environment (WSL, Linux, OSX). I currently only use Debian and NixOS. AFAIK WSL has problems with linux audio so my =bongo= and =empv.el= configuration cannot be used.
 - git
@@ -19,8 +21,82 @@ This is my personal Emacs Configuration. I use Emacs as my "graphical shell" and
 - LSP language servers
 - hunspell
 - compiled Emacs from master branch
+- mbsync
+- msmtp
+- notmuch
 
-You can see my NixOS configuration for how all of this is set-up
+finally:
+
+#+begin_src sh
+git clone https://github.com/Artynnn/Emacs-Configuration ~/.emacs.d/
+#+end_src
+
+* Packages configured
+
+These are the list of packages configured, including built-ins:
+
+1. emacs
+2. repeat
+3. orderless
+4. marginalia
+5. vertico
+6. consult
+7. general
+8. windmove
+9. ace-window
+10. clean-modeline
+11. stimmung-themes
+12. isearch
+13. helpful
+14. embark
+15. avy
+16. artyn-avy
+17. aggressive-indent
+18. projectile
+19. nix-mode
+20. lua-mode
+21. web-mode
+22. emmet-mode
+23. xref
+24. flycheck
+25. lsp-mode
+26. company
+27. dabbrev
+28. 0x0
+29. outline
+30. prot-outline
+31. org
+32. recomplete
+33. markdown-mode
+34. synosaurus
+35. wordnut
+36. olivetti
+37. logos
+38. emacs-everywhere
+39. magit
+40. vc
+41. prot-vc
+42. eww
+43. prot-eww
+44. shr-heading
+45. dired
+46. prot-dired
+47. dired-aux
+48. dired-x
+49. dired-subtree
+50. wdired
+51. image-dired
+52. dired-hist
+53. consult-dir
+54. bongo
+55. prot-bongo
+56. elfeed
+57. prot-elfeed
+58. prot-elfeed-bongo
+59. elfeed-org
+60. empv
+61. pass
+62. notmuch
 
 * Tips
 
