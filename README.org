@@ -2,6 +2,8 @@
 
 This is my personal Emacs Configuration. I use Emacs as my "graphical shell" and "integrated computing environment".
 
+/test/
+
 * Features and goals
 
 - *simple*: No custom macros are used for configuration, I just use the common =use-package=. This makes it very easy to grok.
